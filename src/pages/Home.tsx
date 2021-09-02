@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Alert } from "react-native";
 
 import { Header } from "../components/Header";
 import { Task, TasksList } from "../components/TasksList";
@@ -15,7 +15,15 @@ export function Home() {
       title: newTaskTitle,
       done: false,
     };
-    setTasks((prevTask) => [...prevTask, data]);
+
+    const findTask = tasks.find(
+      (taskItem: Task) => taskItem.title === data.title
+    );
+    if (!findTask) {
+      setTasks((prevTask) => [...prevTask, data]);
+    } else {
+      Alert.alert("Houve um Erro", "Você já tem uma tarefa com esse nome!");
+    }
   }
 
   function handleToggleTaskDone(id: number) {
@@ -35,8 +43,30 @@ export function Home() {
 
   function handleRemoveTask(id: number) {
     //TODO - remove task from state
-    const updatedTaskList = tasks.filter(
-      (taskInfo: Task) => taskInfo.id !== id
+    Alert.alert(
+      "Remover Item",
+      "Tem certeza que você deseja remover esse item?",
+      [
+        {
+          text: "Não",
+          style: "cancel",
+        },
+        {
+          text: "Sim",
+          onPress: () => {
+            const updatedTaskList = tasks.filter(
+              (taskInfo: Task) => taskInfo.id !== id
+            );
+            setTasks(updatedTaskList);
+          },
+        },
+      ]
+    );
+  }
+
+  function handleSkillEdit(taskInfo: Task) {
+    const updatedTaskList = tasks.map((taskItem: Task) =>
+      taskItem.id === taskInfo.id ? { ...taskInfo } : { ...taskItem }
     );
     setTasks(updatedTaskList);
   }
@@ -51,6 +81,7 @@ export function Home() {
         tasks={tasks}
         toggleTaskDone={handleToggleTaskDone}
         removeTask={handleRemoveTask}
+        editSkill={(task) => handleSkillEdit(task)}
       />
     </View>
   );
